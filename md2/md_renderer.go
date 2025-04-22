@@ -73,10 +73,10 @@ func (r *Renderer) listItem(w io.Writer, node *ast.ListItem, entering bool) {
 			}
 		}
 		if flags&ast.ListTypeOrdered != 0 {
-			fmt.Fprintf(w, "%d. ", r.orderedListCounter[r.listDepth])
+			fmt.Fprintf(w, "%d\\. ", r.orderedListCounter[r.listDepth])
 			r.orderedListCounter[r.listDepth]++
 		} else {
-			fmt.Fprintf(w, "%s ", bullet)
+			fmt.Fprintf(w, "\\%s ", bullet)
 		}
 	}
 }
@@ -322,7 +322,7 @@ func (r *Renderer) RenderNode(w io.Writer, node ast.Node, entering bool) ast.Wal
 	case *ast.Emph:
 		r.surround(w, "_")
 	case *ast.Strong:
-		r.surround(w, "**")
+		r.surround(w, "*")
 	case *ast.Del:
 		r.surround(w, "~")
 	case *ast.BlockQuote:
