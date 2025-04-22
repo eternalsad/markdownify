@@ -6,6 +6,7 @@ package parser
 import (
 	"bytes"
 	"fmt"
+	"github.com/gomarkdown/markdown/parser/latex"
 	"strconv"
 	"strings"
 	"unicode"
@@ -126,6 +127,8 @@ type Parser struct {
 	allHeadingsWithAutoID []*ast.Heading
 
 	didParse bool
+
+	latex2Unicode *latex.LaTeXToMarkdownV2
 }
 
 // New creates a markdown parser with CommonExtensions.
@@ -140,14 +143,15 @@ func New() *Parser {
 // NewWithExtensions creates a markdown parser with given extensions.
 func NewWithExtensions(extension Extensions) *Parser {
 	p := Parser{
-		refs:         make(map[string]*reference),
-		refsRecord:   make(map[string]struct{}),
-		maxNesting:   64,
-		InsideLink:   false,
-		Doc:          &ast.Document{},
-		extensions:   extension,
-		allClosed:    true,
-		includeStack: newIncStack(),
+		refs:          make(map[string]*reference),
+		refsRecord:    make(map[string]struct{}),
+		maxNesting:    64,
+		InsideLink:    false,
+		Doc:           &ast.Document{},
+		extensions:    extension,
+		allClosed:     true,
+		includeStack:  newIncStack(),
+		latex2Unicode: latex.NewLaTeXToMarkdownV2(),
 	}
 	p.tip = p.Doc
 	p.oldTip = p.Doc
@@ -305,6 +309,8 @@ func (p *Parser) Parse(input []byte) ast.Node {
 	// the code only works with Unix CR newlines so to make life easy for
 	// callers normalize newlines
 	input = NormalizeNewlines(input)
+
+	input = p.latex2Unicode.EscapeLaTeX(input)
 
 	p.Block(input)
 	// Walk the tree and finish up some of unfinished blocks
