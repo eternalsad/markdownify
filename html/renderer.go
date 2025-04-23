@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gomarkdown/markdown/ast"
-	"github.com/gomarkdown/markdown/parser"
+	"github.com/eternalsad/markdownify/ast"
+	"github.com/eternalsad/markdownify/parser"
 )
 
 // Flags control optional behavior of HTML renderer.

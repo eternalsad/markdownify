@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/gomarkdown/markdown/html"
+	"github.com/eternalsad/markdownify/html"
 )
 
 func TestEsc(t *testing.T) {

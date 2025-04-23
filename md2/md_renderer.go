@@ -3,11 +3,11 @@ package md2
 import (
 	"bytes"
 	"fmt"
-	"github.com/gomarkdown/markdown/parser/latex"
+	"github.com/eternalsad/markdownify/parser/latex"
 	"io"
 	"strings"
 
-	"github.com/gomarkdown/markdown/ast"
+	"github.com/eternalsad/markdownify/ast"
 )
 
 // Renderer renders to markdown. Allows to convert to a canonnical

@@ -1,6 +1,6 @@
 package parser
 
-import "github.com/gomarkdown/markdown/ast"
+import "github.com/eternalsad/markdownify/ast"
 
 // check if the specified position is preceded by an odd number of backslashes
 func isBackslashEscaped(data []byte, i int) bool {

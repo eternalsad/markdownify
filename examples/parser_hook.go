@@ -5,10 +5,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/gomarkdown/markdown"
-	"github.com/gomarkdown/markdown/ast"
-	"github.com/gomarkdown/markdown/html"
-	"github.com/gomarkdown/markdown/parser"
+	"github.com/eternalsad/markdownify/ast"
+	"github.com/eternalsad/markdownify/html"
+	"github.com/eternalsad/markdownify/parser"
 
 	"bytes"
 	"io"

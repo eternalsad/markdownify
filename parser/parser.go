@@ -6,13 +6,13 @@ package parser
 import (
 	"bytes"
 	"fmt"
-	"github.com/gomarkdown/markdown/parser/latex"
+	"github.com/eternalsad/markdownify/parser/latex"
 	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/gomarkdown/markdown/ast"
+	"github.com/eternalsad/markdownify/ast"
 )
 
 // Extensions is a bitmask of enabled parser extensions.

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/gomarkdown/markdown/ast"
+	"github.com/eternalsad/markdownify/ast"
 )
 
 // parse '(#r, text)', where r does not contain spaces, but text may (similar to a citation). Or. (!item) (!item,

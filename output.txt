@@ -1,0 +1,11 @@
+\* This is the first list item\.
+\* Here's the second list item\.
+A blockquote would look great below the second list item\.
+
+\* And here's the third list item\. The rendered output looks like this:
+
+
+```
+∑\_i\=1^\{n\} ∑\_j\=1^\{n\} √\{\|x\_i \- x\_j\|\} ≤ ∑\_i\=1^\{n\} ∑\_j\=1^\{n\} √\{\|x\_i \+ x\_j\|\},
+```
+
