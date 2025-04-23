@@ -1511,7 +1511,7 @@ gatherlines:
 		// anything following an empty line is only part
 		// of this item if it is indented 4 spaces
 		// (regardless of the indentation of the beginning of the item)
-		case containsBlankLine && indent < 4:
+		case containsBlankLine && indent < itemIndent:
 			if *flags&ast.ListTypeDefinition != 0 && i < len(data)-1 {
 				// is the next item still a part of this list?
 				next := skipUntilChar(data, i, '\n')

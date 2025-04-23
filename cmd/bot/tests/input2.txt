@@ -1,0 +1,37 @@
+# Heading level 1
+## Heading level 2
+
+I really like using Markdown.
+
+I just love **bold text**.
+
+I just love __bold text__.
+
+
+
+Love**is**bold
+
+
+Italicized text is the *cat's meow*.
+
+
+This text is ***really important***.
+
+
+1. First item
+2. Second item
+3. Third item
+4. Fourth item
+
+- First item
+- Second item
+- Third item
+- Fourth item
+
+* This is the first list item.
+* Here's the second list item.
+
+    > A blockquote would look great below the second list item.
+
+* And here's the third list item.
+The rendered output looks like this:
