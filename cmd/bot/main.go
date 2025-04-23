@@ -156,6 +156,11 @@ func processMarkdownFile(filePath string, printAst bool) (string, error) {
 	// Рендерим документ
 	output := Render(doc, renderer)
 
+	err = os.WriteFile("output.txt", output, os.ModePerm)
+	if err != nil {
+		log.Printf("output err: %s", err)
+	}
+
 	// Возвращаем результат как строку
 	return string(output), nil
 }

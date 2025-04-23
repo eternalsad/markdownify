@@ -3,6 +3,7 @@ package md2
 import (
 	"bytes"
 	"fmt"
+	"github.com/gomarkdown/markdown/parser/latex"
 	"io"
 	"strings"
 
@@ -21,6 +22,8 @@ type Renderer struct {
 	listDepth      int
 	indentSize     int
 	lastNormalText string
+
+	latex *latex.LaTeXToMarkdownV2
 }
 
 // NewRenderer returns a Markdown renderer.
@@ -29,6 +32,7 @@ func NewRenderer() *Renderer {
 		orderedListCounter: map[int]int{},
 		paragraph:          map[int]bool{},
 		indentSize:         4,
+		latex:              latex.NewLaTeXToMarkdownV2(),
 	}
 }
 
@@ -67,11 +71,16 @@ func (r *Renderer) listItem(w io.Writer, node *ast.ListItem, entering bool) {
 	bullet := string(node.BulletChar)
 
 	if entering {
-		for i := 1; i < r.listDepth; i++ {
-			for i := 0; i < r.indentSize; i++ {
-				fmt.Fprintf(w, " ")
-			}
+		//for i := 1; i < r.listDepth; i++ {
+		//	for i := 0; i < r.indentSize; i++ {
+		//		fmt.Fprintf(w, " ")
+		//	}
+		//}
+
+		if r.listDepth >= 1 {
+			fmt.Fprintf(w, (strings.Repeat(" ", (r.listDepth-1)*r.indentSize)))
 		}
+
 		if flags&ast.ListTypeOrdered != 0 {
 			fmt.Fprintf(w, "%d\\. ", r.orderedListCounter[r.listDepth])
 			r.orderedListCounter[r.listDepth]++
@@ -83,7 +92,7 @@ func (r *Renderer) listItem(w io.Writer, node *ast.ListItem, entering bool) {
 
 func (r *Renderer) para(w io.Writer, node *ast.Paragraph, entering bool) {
 	parent := node.GetParent()
-	firstListItem := false
+	secondListItem := false
 
 	switch parent.(type) {
 	case *ast.ListItem:
@@ -93,9 +102,15 @@ func (r *Renderer) para(w io.Writer, node *ast.Paragraph, entering bool) {
 		}
 
 		if len(parent.GetChildren()) > 1 {
-			if node.AsContainer() == parentList.GetChildren()[0].AsContainer() {
-				firstListItem = true
+			if node.AsContainer() == parentList.GetChildren()[1].AsContainer() {
+				secondListItem = true
 			}
+		}
+	}
+
+	if entering && secondListItem {
+		if secondListItem {
+			r.outs(w, "\t")
 		}
 	}
 
@@ -105,11 +120,6 @@ func (r *Renderer) para(w io.Writer, node *ast.Paragraph, entering bool) {
 		// List items don't need the extra line-break.
 		if _, ok := node.Parent.(*ast.ListItem); ok {
 			br = "\n"
-
-			if firstListItem {
-				br = "\n\t"
-			}
-
 		}
 
 		r.outs(w, br)
@@ -262,9 +272,9 @@ func (r *Renderer) codeBlock(w io.Writer, node *ast.CodeBlock) {
 }
 
 func (r *Renderer) code(w io.Writer, node *ast.Code) {
-	r.outs(w, "\\`")
+	r.outs(w, "`")
 	r.out(w, node.Literal)
-	r.outs(w, "\\`")
+	r.outs(w, "`")
 }
 
 //// Рендерер для заголовка таблицы
@@ -802,21 +812,31 @@ func (r *Renderer) RenderFooter(w io.Writer, ast ast.Node) {
 }
 
 func (r *Renderer) math(w io.Writer, node *ast.Math) {
-	r.outs(w, "\\$")
+	r.outs(w, "` ")
 	r.out(w, []byte(escapeMarkdownV2(string(node.Literal))))
-	r.outs(w, "\\$")
+	r.outs(w, " `")
 }
 
 func (r *Renderer) mathBlock(w io.Writer, node *ast.MathBlock, entering bool) {
+	if r.latex.ContainsLaTeXSymbols(string(node.Literal)) {
+		return
+	}
+
 	if entering {
-		r.outs(w, "\\$\\$")
+		r.outs(w, "```\n")
 		r.out(w, []byte(escapeMarkdownV2(string(node.Literal))))
 	} else {
-		r.outs(w, "\\$\\$")
+		r.outs(w, "\n```")
 	}
 }
 
 func (r *Renderer) blockQuote(w io.Writer, node *ast.BlockQuote) {
-	r.outs(w, "\\>")
-	r.out(w, node.Literal)
+	// blockquote могут быть только детьми шлюх и документа
+	if _, ok := node.GetParent().(*ast.Document); !ok {
+		r.outs(w, strings.TrimLeft(escapeMarkdownV2(string((node.Literal))), " "))
+		return
+	}
+
+	r.outs(w, ">")
+	r.outs(w, strings.TrimLeft(escapeMarkdownV2(string((node.Literal))), " "))
 }

@@ -3,6 +3,7 @@ package latex
 import (
 	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -15,45 +16,192 @@ type LaTeXToMarkdownV2 struct {
 func NewLaTeXToMarkdownV2() *LaTeXToMarkdownV2 {
 	// Словарь для конвертации LaTeX символов в Unicode
 	latexSymbols := map[string]string{
+		// Греческие буквы строчные
 		"\\alpha":      "α",
 		"\\beta":       "β",
 		"\\gamma":      "γ",
 		"\\delta":      "δ",
 		"\\epsilon":    "ε",
+		"\\varepsilon": "ε",
 		"\\zeta":       "ζ",
 		"\\eta":        "η",
 		"\\theta":      "θ",
+		"\\vartheta":   "ϑ",
+		"\\iota":       "ι",
+		"\\kappa":      "κ",
 		"\\lambda":     "λ",
 		"\\mu":         "μ",
+		"\\nu":         "ν",
+		"\\xi":         "ξ",
 		"\\pi":         "π",
+		"\\varpi":      "ϖ",
 		"\\rho":        "ρ",
+		"\\varrho":     "ϱ",
 		"\\sigma":      "σ",
+		"\\varsigma":   "ς",
 		"\\tau":        "τ",
+		"\\upsilon":    "υ",
 		"\\phi":        "φ",
+		"\\varphi":     "φ",
+		"\\chi":        "χ",
+		"\\psi":        "ψ",
 		"\\omega":      "ω",
-		"\\sum":        "∑",
-		"\\int":        "∫",
-		"\\infty":      "∞",
-		"\\partial":    "∂",
-		"\\nabla":      "∇",
-		"\\pm":         "±",
-		"\\times":      "×",
-		"\\div":        "÷",
-		"\\leq":        "≤",
-		"\\geq":        "≥",
-		"\\neq":        "≠",
-		"\\approx":     "≈",
-		"\\cdot":       "·",
+
+		// Греческие буквы заглавные
+		"\\Gamma":   "Γ",
+		"\\Delta":   "Δ",
+		"\\Theta":   "Θ",
+		"\\Lambda":  "Λ",
+		"\\Xi":      "Ξ",
+		"\\Pi":      "Π",
+		"\\Sigma":   "Σ",
+		"\\Upsilon": "Υ",
+		"\\Phi":     "Φ",
+		"\\Psi":     "Ψ",
+		"\\Omega":   "Ω",
+
+		// Математические операторы
+		"\\sum":      "∑",
+		"\\prod":     "∏",
+		"\\coprod":   "∐",
+		"\\int":      "∫",
+		"\\oint":     "∮",
+		"\\iint":     "∬",
+		"\\iiint":    "∭",
+		"\\partial":  "∂",
+		"\\nabla":    "∇",
+		"\\pm":       "±",
+		"\\mp":       "∓",
+		"\\times":    "×",
+		"\\div":      "÷",
+		"\\setminus": "\\",
+		"\\cdot":     "·",
+		"\\ast":      "∗",
+		"\\star":     "★",
+		"\\circ":     "∘",
+		"\\bullet":   "•",
+
+		// Отношения
+		"\\leq":    "≤",
+		"\\geq":    "≥",
+		"\\neq":    "≠",
+		"\\approx": "≈",
+		"\\equiv":  "≡",
+		"\\cong":   "≅",
+		"\\sim":    "∼",
+		"\\propto": "∝",
+		"\\prec":   "≺",
+		"\\succ":   "≻",
+		"\\preceq": "⪯",
+		"\\succeq": "⪰",
+		"\\ll":     "≪",
+		"\\gg":     "≫",
+
+		// Теория множеств
 		"\\in":         "∈",
+		"\\notin":      "∉",
+		"\\ni":         "∋",
 		"\\subset":     "⊂",
+		"\\supset":     "⊃",
+		"\\subseteq":   "⊆",
+		"\\supseteq":   "⊇",
 		"\\cup":        "∪",
 		"\\cap":        "∩",
-		"\\to":         "→",
-		"\\rightarrow": "→",
-		"\\leftarrow":  "←",
-		"\\Rightarrow": "⇒",
-		"\\Leftarrow":  "⇐",
-		// Добавьте больше символов по необходимости
+		"\\emptyset":   "∅",
+		"\\varnothing": "∅",
+
+		// Логические символы
+		"\\land":      "∧",
+		"\\lor":       "∨",
+		"\\lnot":      "¬",
+		"\\forall":    "∀",
+		"\\exists":    "∃",
+		"\\nexists":   "∄",
+		"\\therefore": "∴",
+		"\\because":   "∵",
+
+		// Стрелки
+		"\\to":             "→",
+		"\\rightarrow":     "→",
+		"\\leftarrow":      "←",
+		"\\Rightarrow":     "⇒",
+		"\\Leftarrow":      "⇐",
+		"\\mapsto":         "↦",
+		"\\uparrow":        "↑",
+		"\\downarrow":      "↓",
+		"\\updownarrow":    "↕",
+		"\\leftrightarrow": "↔",
+		"\\Leftrightarrow": "⇔",
+
+		// Разное
+		"\\infty":         "∞",
+		"\\aleph":         "ℵ",
+		"\\hbar":          "ℏ",
+		"\\ell":           "ℓ",
+		"\\wp":            "℘",
+		"\\Re":            "ℜ",
+		"\\Im":            "ℑ",
+		"\\angle":         "∠",
+		"\\measuredangle": "∡",
+		"\\triangle":      "△",
+		"\\square":        "□",
+		"\\overline":      "‾", // Приближение, может не работать правильно
+		"\\dots":          "…",
+		"\\cdots":         "⋯",
+		"\\vdots":         "⋮",
+		"\\ddots":         "⋱",
+
+		// Специальные комбинации
+		"\\_0": "₀",
+		"\\_1": "₁",
+		"\\_2": "₂",
+		"\\_3": "₃",
+		"\\_4": "₄",
+		"\\_5": "₅",
+		"\\_6": "₆",
+		"\\_7": "₇",
+		"\\_8": "₈",
+		"\\_9": "₉",
+		"\\^0": "⁰",
+		"\\^1": "¹",
+		"\\^2": "²",
+		"\\^3": "³",
+		"\\^4": "⁴",
+		"\\^5": "⁵",
+		"\\^6": "⁶",
+		"\\^7": "⁷",
+		"\\^8": "⁸",
+		"\\^9": "⁹",
+
+		// Векторное исчисление
+		"\\vec":  "→", // Обычно отображается над символом, здесь упрощенно
+		"\\dot":  "·", // Точка над символом (упрощенно)
+		"\\ddot": "¨", // Две точки над символом (упрощенно)
+
+		// Дроби и корни
+		"\\frac": "/", // Упрощенное представление дроби
+		"\\sqrt": "√",
+
+		// Скобки
+		"\\lbrace": "{",
+		"\\rbrace": "}",
+		"\\langle": "⟨",
+		"\\rangle": "⟩",
+		"\\lceil":  "⌈",
+		"\\rceil":  "⌉",
+		"\\lfloor": "⌊",
+		"\\rfloor": "⌋",
+
+		// Физические константы
+		"\\varepsilon_0": "ε₀",
+		"\\mu_0":         "μ₀",
+
+		// Дополнительные операторы
+		"\\oplus":    "⊕",
+		"\\otimes":   "⊗",
+		"\\perp":     "⊥",
+		"\\parallel": "∥",
+		"\\surd":     "√",
 	}
 
 	return &LaTeXToMarkdownV2{
@@ -62,7 +210,7 @@ func NewLaTeXToMarkdownV2() *LaTeXToMarkdownV2 {
 }
 
 // containsLaTeXSymbols проверяет, содержит ли текст LaTeX символы
-func (l *LaTeXToMarkdownV2) containsLaTeXSymbols(content string) bool {
+func (l *LaTeXToMarkdownV2) ContainsLaTeXSymbols(content string) bool {
 	if len(content) < 5 {
 		return false
 	}
@@ -95,14 +243,48 @@ func (l *LaTeXToMarkdownV2) containsLaTeXSymbols(content string) bool {
 	return false
 }
 
-// convertLaTeXToUnicode преобразует LaTeX команды в Unicode символы
 func (l *LaTeXToMarkdownV2) convertLaTeXToUnicode(content string) string {
-	result := content
-
-	// Заменяем LaTeX символы на Unicode эквиваленты
-	for latex, unicode := range l.latexSymbols {
-		result = strings.ReplaceAll(result, latex, unicode)
+	// 1. Сортируем символы по длине (от длинных к коротким)
+	type symbolPair struct {
+		latex   string
+		unicode string
 	}
+
+	pairs := make([]symbolPair, 0, len(l.latexSymbols))
+	for latex, unicode := range l.latexSymbols {
+		pairs = append(pairs, symbolPair{latex, unicode})
+	}
+
+	// Сортировка от длинных к коротким
+	sort.Slice(pairs, func(i, j int) bool {
+		return len(pairs[i].latex) > len(pairs[j].latex)
+	})
+
+	// 2. Используем builder для создания результата
+	var builder strings.Builder
+	i := 0
+
+	for i < len(content) {
+		matched := false
+
+		// Проверяем на совпадение с символами (начиная с самых длинных)
+		for _, pair := range pairs {
+			if i+len(pair.latex) <= len(content) && content[i:i+len(pair.latex)] == pair.latex {
+				builder.WriteString(pair.unicode)
+				i += len(pair.latex)
+				matched = true
+				break
+			}
+		}
+
+		if !matched {
+			// Если символ не найден, просто добавляем текущий символ
+			builder.WriteByte(content[i])
+			i++
+		}
+	}
+
+	result := builder.String()
 
 	// Обработка специальных конструкций
 	result = l.processSpecialConstructs(result)
@@ -168,7 +350,7 @@ func (l *LaTeXToMarkdownV2) EscapeLaTeX(text []byte) []byte {
 		}
 
 		content := match[1]
-		if !l.containsLaTeXSymbols(content) {
+		if !l.ContainsLaTeXSymbols(content) {
 			return match[0] // Возвращаем без изменений, если нет LaTeX символов
 		}
 
