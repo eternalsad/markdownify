@@ -15,18 +15,17 @@ var (
 
 // init initializes the parser and renderer once
 func init() {
-	// Initialize parser with extensions
-	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
-	mdParser = parser.NewWithExtensions(extensions)
-
 	// Initialize the renderer for Markdown V2
 	md2Renderer = md2.NewRenderer()
 }
 
 // ConvertMD2 converts regular Markdown to Telegram's Markdown V2 format
 func ConvertMD2(md string) string {
+	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
+	p := parser.NewWithExtensions(extensions)
+
 	// Parse the markdown input
-	doc := mdParser.Parse([]byte(md))
+	doc := p.Parse([]byte(md))
 
 	// Render to Markdown V2
 	output := render(doc, md2Renderer)
